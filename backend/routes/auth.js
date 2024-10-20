@@ -5,44 +5,44 @@ const User = require("../models/User"); // Make sure the path is correct
 const router = express.Router();
 
 // User Registration (Signup)
-router.post('/signup', async (req, res) => {
-  const { username, email, password } = req.body;
+// Backend: routes/auth.js
+router.post("/register", async (req, res) => {
+  const { name, email, password } = req.body;
 
-  if (!password) {
-    return res.status(400).json({ message: 'Password is required' });
-  }
+  console.log(req.body); // Check what data you're receiving
 
   try {
+    // Check if all required fields are provided
+    if (!name || !email || !password) {
+      return res.status(400).json({ message: "Please fill in all fields" });
+    }
+
     // Check if user already exists
     let user = await User.findOne({ email });
     if (user) {
-      return res.status(400).json({ message: 'User already exists' });
+      return res.status(400).json({ message: "User already exists" });
     }
 
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create a new user
+    // Create new user
     user = new User({
-      username,
+      name,
       email,
       password: hashedPassword,
     });
 
-    // Save user to database
     await user.save();
 
-    // Generate JWT token
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-      expiresIn: '1h',
-    });
-
-    res.status(201).json({ token });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Server error' });
+    // Return success response
+    return res.status(201).json({ message: "User registered successfully" });
+  } catch (err) {
+    console.error(err.message); // Log the error
+    return res.status(500).json({ message: "Server error" });
   }
 });
+
 
 
 
