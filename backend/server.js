@@ -13,13 +13,7 @@ const app = express();
 
 // Middleware to parse JSON bodies
 app.use(express.json());
-app.use(
-  cors({
-    origin: "http://localhost:5173", // Allow your frontend URL
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true,
-  })
-);        
+app.use(cors());          
 
 // Import auth routes
 const authRoutes = require("./routes/auth");
