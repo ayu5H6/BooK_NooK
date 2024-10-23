@@ -5,15 +5,14 @@ const User = require("../models/User"); // Make sure the path is correct
 const router = express.Router();
 
 // User Registration (Signup)
-// Backend: routes/auth.js
 router.post("/register", async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, username } = req.body;
 
   console.log(req.body); // Check what data you're receiving
 
   try {
     // Check if all required fields are provided
-    if (!name || !email || !password) {
+    if (!name || !email || !password || !username) {
       return res.status(400).json({ message: "Please fill in all fields" });
     }
 
@@ -31,6 +30,7 @@ router.post("/register", async (req, res) => {
       name,
       email,
       password: hashedPassword,
+      username, // Include the username
     });
 
     await user.save();
@@ -38,13 +38,12 @@ router.post("/register", async (req, res) => {
     // Return success response
     return res.status(201).json({ message: "User registered successfully" });
   } catch (err) {
-    console.error(err.message); // Log the error
-    return res.status(500).json({ message: "Server error" });
+    console.error(err); // Log the full error
+    return res
+      .status(500)
+      .json({ message: "Server error", error: err.message });
   }
 });
-
-
-
 
 // Login Route
 router.post("/login", async (req, res) => {
