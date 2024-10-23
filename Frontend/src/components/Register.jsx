@@ -6,7 +6,7 @@ const Register = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [username, setUsername] = useState(""); // New state for username
+  const [username, setUsername] = useState("");
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
 
@@ -17,11 +17,11 @@ const Register = () => {
         name,
         email,
         password,
-        username, // Include username in the request
+        username,
       });
 
       if (res.status === 201) {
-        navigate("/books"); // Redirect to book search page after registration
+        navigate("/books");
       } else {
         setMessage(res.data.message);
       }
@@ -31,45 +31,51 @@ const Register = () => {
   };
 
   return (
-    <div className="container mx-auto">
-      <h1 className="text-3xl font-bold my-4">Register</h1>
-      <form onSubmit={handleRegister}>
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Name"
-          className="border rounded p-2 w-full"
-        />
-        <input
-          type="text"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)} // Handle username input
-          placeholder="Username"
-          className="border rounded p-2 w-full"
-        />
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Email"
-          className="border rounded p-2 w-full"
-        />
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Password"
-          className="border rounded p-2 w-full"
-        />
-        <button
-          type="submit"
-          className="bg-blue-500 text-white p-2 rounded mt-2"
-        >
-          Register
-        </button>
-      </form>
-      {message && <p>{message}</p>}
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-teal-500 to-blue-500">
+      <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
+        <h1 className="text-2xl font-bold text-center mb-6">Register</h1>
+        <form onSubmit={handleRegister}>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Name"
+            className="border rounded p-2 w-full mb-4"
+            required
+          />
+          <input
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            placeholder="Username"
+            className="border rounded p-2 w-full mb-4"
+            required
+          />
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email"
+            className="border rounded p-2 w-full mb-4"
+            required
+          />
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Password"
+            className="border rounded p-2 w-full mb-4"
+            required
+          />
+          <button
+            type="submit"
+            className="bg-teal-600 text-white p-2 rounded w-full hover:bg-teal-700 transition duration-300"
+          >
+            Register
+          </button>
+        </form>
+        {message && <p className="text-red-500 text-center mt-2">{message}</p>}
+      </div>
     </div>
   );
 };

@@ -30,16 +30,13 @@ const BookSearch = () => {
     navigate(`/books/${bookId}`);
   };
 
-  // Fetch random books when the component mounts
   useEffect(() => {
     const fetchRandomBooks = async () => {
       try {
         const res = await axios.get(
           "https://www.googleapis.com/books/v1/volumes?q=fiction"
-        ); // A general query
+        );
         const items = res.data.items;
-
-        // Randomly select 5 books from the fetched items
         const randomSelection = items
           .sort(() => 0.5 - Math.random())
           .slice(0, 5);
@@ -53,39 +50,44 @@ const BookSearch = () => {
   }, []);
 
   return (
-    <div className="container mx-auto">
-      <h1 className="text-3xl font-bold my-4">Book Search</h1>
-      <form onSubmit={handleSearch}>
+    <div className="container mx-auto py-6">
+      <h1 className="text-3xl font-bold text-center mb-6">Book Search</h1>
+      <form onSubmit={handleSearch} className="flex justify-center mb-6">
         <input
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search for books..."
-          className="border rounded p-2 w-full"
+          className="border rounded-l-lg p-2 w-1/2 md:w-1/3"
+          required
         />
         <button
           type="submit"
-          className="bg-blue-500 text-white p-2 rounded mt-2"
+          className="bg-blue-600 text-white p-2 rounded-r-lg hover:bg-blue-700 transition duration-300"
         >
           Search
         </button>
       </form>
-      {message && <p>{message}</p>}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 my-4">
+      {message && <p className="text-red-500 text-center mb-4">{message}</p>}
+      <h2 className="text-2xl font-bold mb-4">Search Results</h2>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {books.map((book) => (
           <div
             key={book.id}
-            className="border rounded p-4 cursor-pointer"
+            className="border rounded-lg p-4 cursor-pointer hover:shadow-lg transition duration-300"
             onClick={() => handleBookClick(book.id)}
           >
             <h2 className="font-bold">{book.volumeInfo.title}</h2>
             {book.volumeInfo.authors && (
-              <p>Authors: {book.volumeInfo.authors.join(", ")}</p>
+              <p className="text-sm">
+                Authors: {book.volumeInfo.authors.join(", ")}
+              </p>
             )}
             {book.volumeInfo.imageLinks && (
               <img
                 src={book.volumeInfo.imageLinks.thumbnail}
                 alt={book.volumeInfo.title}
+                className="mt-2"
               />
             )}
           </div>
@@ -97,17 +99,20 @@ const BookSearch = () => {
         {randomBooks.map((book) => (
           <div
             key={book.id}
-            className="border rounded p-4 cursor-pointer"
+            className="border rounded-lg p-4 cursor-pointer hover:shadow-lg transition duration-300"
             onClick={() => handleBookClick(book.id)}
           >
             <h2 className="font-bold">{book.volumeInfo.title}</h2>
             {book.volumeInfo.authors && (
-              <p>Authors: {book.volumeInfo.authors.join(", ")}</p>
+              <p className="text-sm">
+                Authors: {book.volumeInfo.authors.join(", ")}
+              </p>
             )}
             {book.volumeInfo.imageLinks && (
               <img
                 src={book.volumeInfo.imageLinks.thumbnail}
                 alt={book.volumeInfo.title}
+                className="mt-2"
               />
             )}
           </div>
