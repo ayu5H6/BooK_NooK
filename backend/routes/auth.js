@@ -5,15 +5,24 @@ const User = require("../models/User"); // Make sure the path is correct
 const router = express.Router();
 
 // User Registration (Signup)
+<<<<<<< HEAD
 // Backend: routes/auth.js
 router.post("/register", async (req, res) => {
   const { name, email, password } = req.body;
+=======
+router.post("/register", async (req, res) => {
+  const { name, email, password, username } = req.body;
+>>>>>>> f44c18c2c63d02b5eb16d323a8461af4e28d51f1
 
   console.log(req.body); // Check what data you're receiving
 
   try {
     // Check if all required fields are provided
+<<<<<<< HEAD
     if (!name || !email || !password) {
+=======
+    if (!name || !email || !password || !username) {
+>>>>>>> f44c18c2c63d02b5eb16d323a8461af4e28d51f1
       return res.status(400).json({ message: "Please fill in all fields" });
     }
 
@@ -31,6 +40,10 @@ router.post("/register", async (req, res) => {
       name,
       email,
       password: hashedPassword,
+<<<<<<< HEAD
+=======
+      username, // Include the username
+>>>>>>> f44c18c2c63d02b5eb16d323a8461af4e28d51f1
     });
 
     await user.save();
@@ -38,6 +51,7 @@ router.post("/register", async (req, res) => {
     // Return success response
     return res.status(201).json({ message: "User registered successfully" });
   } catch (err) {
+<<<<<<< HEAD
     console.error(err.message); // Log the error
     return res.status(500).json({ message: "Server error" });
   }
@@ -46,6 +60,15 @@ router.post("/register", async (req, res) => {
 
 
 
+=======
+    console.error(err); // Log the full error
+    return res
+      .status(500)
+      .json({ message: "Server error", error: err.message });
+  }
+});
+
+>>>>>>> f44c18c2c63d02b5eb16d323a8461af4e28d51f1
 // Login Route
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
