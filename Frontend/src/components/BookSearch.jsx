@@ -1,119 +1,139 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useUser } from "../context/UserContext"; // Import context
+import { useNavigate } from "react-router-dom"; // Import useNavigate for navigation
 
 const BookSearch = () => {
-  const [query, setQuery] = useState("");
-  const [books, setBooks] = useState([]);
-  const [randomBooks, setRandomBooks] = useState([]);
-  const [message, setMessage] = useState("");
-  const navigate = useNavigate();
+  const { selectedGenres } = useUser(); // Get selected genres from context
+  const [recommendedBooks, setRecommendedBooks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [searchTerm, setSearchTerm] = useState(""); // State for search term
+  const [searchResults, setSearchResults] = useState([]); // State for search results
+  const navigate = useNavigate(); // Use navigate for redirection
 
-  const handleSearch = async (e) => {
-    e.preventDefault();
+  const fetchRecommendedBooks = async () => {
+    if (selectedGenres.length === 0) {
+      setRecommendedBooks([]); // Clear books if no genres selected
+      setLoading(false);
+      return; // Exit if no genres selected
+    }
+
     try {
-      const res = await axios.get(
-        `https://www.googleapis.com/books/v1/volumes?q=${query}`
+      const promises = selectedGenres.map((genre) =>
+        axios.get(
+          `https://www.googleapis.com/books/v1/volumes?q=subject:${genre}`
+        )
       );
-      if (res.data.items) {
-        setBooks(res.data.items);
-        setMessage("");
-      } else {
-        setMessage("No books found.");
-      }
-    } catch (err) {
-      setMessage("Error fetching books. Please try again.");
+
+      const results = await Promise.all(promises);
+      const allBooks = results.flatMap((res) => res.data.items || []);
+      setRecommendedBooks(allBooks);
+    } catch (error) {
+      console.error("Error fetching recommended books:", error);
+      setError("Error fetching recommended books.");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleBookClick = (bookId) => {
-    navigate(`/books/${bookId}`);
+  const searchBooks = async () => {
+    if (!searchTerm) return; // Exit if searchTerm is empty
+    try {
+      const res = await axios.get(
+        `https://www.googleapis.com/books/v1/volumes?q=${searchTerm}`
+      );
+      setSearchResults(res.data.items || []);
+    } catch (error) {
+      console.error("Error fetching search results:", error);
+      setError("Error fetching search results.");
+    }
   };
 
   useEffect(() => {
-    const fetchRandomBooks = async () => {
-      try {
-        const res = await axios.get(
-          "https://www.googleapis.com/books/v1/volumes?q=fiction"
-        );
-        const items = res.data.items;
-        const randomSelection = items
-          .sort(() => 0.5 - Math.random())
-          .slice(0, 5);
-        setRandomBooks(randomSelection);
-      } catch (err) {
-        console.error("Error fetching random books:", err);
-      }
-    };
+    fetchRecommendedBooks(); // Fetch recommended books when genres change
+  }, [selectedGenres]);
 
-    fetchRandomBooks();
-  }, []);
+  if (loading) {
+    return <div className="text-center">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="text-red-500 text-center">{error}</div>;
+  }
 
   return (
     <div className="container mx-auto py-6">
-      <h1 className="text-3xl font-bold text-center mb-6">Book Search</h1>
-      <form onSubmit={handleSearch} className="flex justify-center mb-6">
+      <h2 className="text-2xl font-semibold mb-4">Search for Books</h2>
+
+      {/* Search Bar and Button */}
+      <div className="flex mb-4">
         <input
           type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
           placeholder="Search for books..."
-          className="border rounded-l-lg p-2 w-1/2 md:w-1/3"
-          required
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="border border-gray-300 p-2 rounded w-full"
         />
         <button
-          type="submit"
-          className="bg-blue-600 text-white p-2 rounded-r-lg hover:bg-blue-700 transition duration-300"
+          onClick={searchBooks}
+          className="bg-blue-600 text-white p-2 rounded ml-2 hover:bg-blue-700 transition duration-300"
         >
           Search
         </button>
-      </form>
-      {message && <p className="text-red-500 text-center mb-4">{message}</p>}
-      <h2 className="text-2xl font-bold mb-4">Search Results</h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {books.map((book) => (
-          <div
-            key={book.id}
-            className="border rounded-lg p-4 cursor-pointer hover:shadow-lg transition duration-300"
-            onClick={() => handleBookClick(book.id)}
-          >
-            <h2 className="font-bold">{book.volumeInfo.title}</h2>
-            {book.volumeInfo.authors && (
-              <p className="text-sm">
-                Authors: {book.volumeInfo.authors.join(", ")}
-              </p>
-            )}
-            {book.volumeInfo.imageLinks && (
-              <img
-                src={book.volumeInfo.imageLinks.thumbnail}
-                alt={book.volumeInfo.title}
-                className="mt-2"
-              />
-            )}
-          </div>
-        ))}
       </div>
 
-      <h2 className="text-2xl font-bold my-4">Recommended Books</h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {randomBooks.map((book) => (
+      {/* Display Search Results Header Only When There Are Results */}
+      {searchResults.length > 0 && (
+        <>
+          <h3 className="text-xl font-semibold mb-2">Search Results</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
+            {searchResults.map((book) => (
+              <div
+                key={book.id}
+                className="border rounded-lg p-4 shadow-lg cursor-pointer"
+                onClick={() => navigate(`/books/${book.id}`)} // Navigate to BookDetails on click
+              >
+                {book.volumeInfo.imageLinks?.thumbnail && (
+                  <img
+                    src={book.volumeInfo.imageLinks.thumbnail}
+                    alt={book.volumeInfo.title}
+                    className="mb-2 rounded"
+                  />
+                )}
+                <h3 className="font-bold">{book.volumeInfo.title}</h3>
+                {book.volumeInfo.authors && (
+                  <p className="text-gray-600">
+                    Authors: {book.volumeInfo.authors.join(", ")}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* Display Recommended Books */}
+      <h2 className="text-2xl font-semibold mb-4">Recommended Books</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {recommendedBooks.map((book) => (
           <div
             key={book.id}
-            className="border rounded-lg p-4 cursor-pointer hover:shadow-lg transition duration-300"
-            onClick={() => handleBookClick(book.id)}
+            className="border rounded-lg p-4 shadow-lg cursor-pointer"
+            onClick={() => navigate(`/books/${book.id}`)} // Navigate to BookDetails on click
           >
-            <h2 className="font-bold">{book.volumeInfo.title}</h2>
-            {book.volumeInfo.authors && (
-              <p className="text-sm">
-                Authors: {book.volumeInfo.authors.join(", ")}
-              </p>
-            )}
-            {book.volumeInfo.imageLinks && (
+            {book.volumeInfo.imageLinks?.thumbnail && (
               <img
                 src={book.volumeInfo.imageLinks.thumbnail}
                 alt={book.volumeInfo.title}
-                className="mt-2"
+                className="mb-2 rounded"
               />
+            )}
+            <h3 className="font-bold">{book.volumeInfo.title}</h3>
+            {book.volumeInfo.authors && (
+              <p className="text-gray-600">
+                Authors: {book.volumeInfo.authors.join(", ")}
+              </p>
             )}
           </div>
         ))}
@@ -123,5 +143,3 @@ const BookSearch = () => {
 };
 
 export default BookSearch;
-
-//

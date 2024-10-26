@@ -1,17 +1,13 @@
-const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const User = require("../models/User"); // Make sure the path is correct
-const router = express.Router();
+const User = require("../models/User");
+console.log("Auth routes initialized");
 
-// User Registration (Signup)
-router.post("/register", async (req, res) => {
-  const { name, email, password, username } = req.body;
-
-  console.log(req.body); // Check what data you're receiving
+exports.register = async (req, res) => {
+  const { name, email, password, username, favoriteGenres } = req.body; // Include favoriteGenres
 
   try {
-    // Check if all required fields are provided
+    // Validate input fields
     if (!name || !email || !password || !username) {
       return res.status(400).json({ message: "Please fill in all fields" });
     }
@@ -25,29 +21,36 @@ router.post("/register", async (req, res) => {
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create new user
+    // Create new user with favoriteGenres
     user = new User({
       name,
       email,
       password: hashedPassword,
-      username, // Include the username
+      username,
+      favoriteGenres: favoriteGenres || [], // Include favorite genres (default to empty array)
     });
 
     await user.save();
 
-    // Return success response
     return res.status(201).json({ message: "User registered successfully" });
   } catch (err) {
-    console.error(err); // Log the full error
+    console.error(err);
     return res
       .status(500)
       .json({ message: "Server error", error: err.message });
   }
-});
+};
 
-// Login Route
-router.post("/login", async (req, res) => {
+exports.login = async (req, res) => {
+  // Log the incoming request body
+  console.log("Login request body:", req.body);
+
   const { email, password } = req.body;
+
+  // Validate input fields
+  if (!email || !password) {
+    return res.status(400).json({ message: "Please fill in all fields" });
+  }
 
   try {
     const user = await User.findOne({ email });
@@ -63,12 +66,9 @@ router.post("/login", async (req, res) => {
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
-
     res.json({ token });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Server error" });
   }
-});
-
-module.exports = router;
+};

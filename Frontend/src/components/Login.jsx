@@ -1,60 +1,72 @@
+// Login.jsx
 import React, { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { useUser } from "../context/UserContext"; // Import the context
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
+  const { setUserId } = useUser(); // Get setUserId from context
 
-  const handleLogin = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/login", {
-        email,
-        password,
-      });
+      const response = await axios.post(
+        "http://localhost:5000/api/auth/login",
+        {
+          email,
+          password,
+        }
+      );
 
-      if (res.status === 200) {
-        navigate("/books");
-      } else {
-        setMessage(res.data.message);
-      }
+      // Save token and userId in context
+      localStorage.setItem("token", response.data.token);
+      setUserId(response.data.userId); // Set userId in context
+
+      navigate("/home"); // Navigate after login
     } catch (err) {
-      setMessage("Login failed. Please check your credentials.");
+      setError(err.response?.data.message || "Error logging in");
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-500 to-teal-500">
-      <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
-        <h1 className="text-2xl font-bold text-center mb-6">Login</h1>
-        <form onSubmit={handleLogin}>
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-purple-500 to-pink-500">
+      <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full text-center">
+        <h1 className="text-3xl font-bold mb-4">Login</h1>
+        {error && <p className="text-red-500">{error}</p>}
+        <form onSubmit={handleSubmit}>
           <input
             type="email"
+            placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="Email"
-            className="border rounded p-2 w-full mb-4"
+            className="border p-2 rounded w-full mb-4"
             required
           />
           <input
             type="password"
+            placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="Password"
-            className="border rounded p-2 w-full mb-4"
+            className="border p-2 rounded w-full mb-4"
             required
           />
           <button
             type="submit"
-            className="bg-blue-600 text-white p-2 rounded w-full hover:bg-blue-700 transition duration-300"
+            className="bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition duration-300"
           >
             Login
           </button>
         </form>
-        {message && <p className="text-red-500 text-center mt-2">{message}</p>}
+        <p className="mt-4">
+          Don't have an account?{" "}
+          <Link to="/register" className="text-blue-600 hover:underline">
+            Register here
+          </Link>
+        </p>
       </div>
     </div>
   );
