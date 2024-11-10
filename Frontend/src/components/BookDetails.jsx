@@ -1,4 +1,3 @@
-// components/BookDetails.jsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
@@ -34,6 +33,10 @@ const BookDetails = () => {
     }
   };
 
+  const handleAuthorClick = (author) => {
+    navigate(`/author-books?author=${encodeURIComponent(author)}`);
+  };
+
   if (loading) {
     return <div className="text-center">Loading...</div>;
   }
@@ -43,7 +46,7 @@ const BookDetails = () => {
   }
 
   return (
-    <div className="container mx-auto py-6">
+    <div className="container mx-auto p-6">
       <div className="flex justify-end mb-4">
         <input
           type="text"
@@ -63,7 +66,7 @@ const BookDetails = () => {
         <div className="mb-6">
           {book.volumeInfo.imageLinks ? (
             <img
-              src={book.volumeInfo.imageLinks.smallThumbnail} // Smaller image size
+              src={book.volumeInfo.imageLinks.smallThumbnail}
               alt={book.volumeInfo.title}
               className="rounded-lg"
             />
@@ -73,27 +76,41 @@ const BookDetails = () => {
             </div>
           )}
         </div>
-        <h1 className="text-3xl font-bold mb-2">{book.volumeInfo.title}</h1>
+        <h1 className="text-3xl font-bold mb-2 text-center">
+          {book.volumeInfo.title}
+        </h1>
         {book.volumeInfo.authors && (
-          <p className="text-sm text-gray-600 mb-4">
-            Authors: {book.volumeInfo.authors.join(", ")}
+          <p className="text-sm text-gray-600 mb-4 text-center">
+            Authors:{" "}
+            {book.volumeInfo.authors.map((author, index) => (
+              <span
+                key={author}
+                className="text-blue-600 cursor-pointer"
+                onClick={() => handleAuthorClick(author)}
+              >
+                {author}
+                {index < book.volumeInfo.authors.length - 1 && ", "}
+              </span>
+            ))}
           </p>
         )}
-        <p className="text-lg mb-4">
-          <strong>Published:</strong> {book.volumeInfo.publishedDate}
-        </p>
-        <p className="text-lg mb-4">
-          <strong>Publisher:</strong> {book.volumeInfo.publisher}
-        </p>
-        <p className="text-lg mb-4">
-          <strong>Page Count:</strong> {book.volumeInfo.pageCount}
-        </p>
-        <p className="text-lg mb-4">
-          <strong>Categories:</strong>{" "}
-          {book.volumeInfo.categories?.join(", ") || "N/A"}
-        </p>
+        <div className="text-lg mb-4 text-center">
+          <p>
+            <strong>Published:</strong> {book.volumeInfo.publishedDate}
+          </p>
+          <p>
+            <strong>Publisher:</strong> {book.volumeInfo.publisher}
+          </p>
+          <p>
+            <strong>Page Count:</strong> {book.volumeInfo.pageCount}
+          </p>
+          <p>
+            <strong>Categories:</strong>{" "}
+            {book.volumeInfo.categories?.join(", ") || "N/A"}
+          </p>
+        </div>
         <h2 className="text-2xl font-semibold mb-2">Description</h2>
-        <p className="text-gray-700 mb-4">
+        <p className="text-gray-700 mb-4 text-center">
           {book.volumeInfo.description
             ? book.volumeInfo.description.replace(/<\/?[^>]+(>|$)/g, "")
             : "No description available."}
