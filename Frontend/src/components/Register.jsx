@@ -31,6 +31,11 @@ const Register = () => {
           email,
           password,
           username,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json", // Ensure the server knows you're sending JSON data
+          },
         }
       );
       navigate("/login");

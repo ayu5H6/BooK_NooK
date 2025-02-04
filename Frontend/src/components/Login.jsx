@@ -29,6 +29,11 @@ const Login = () => {
         {
           email,
           password,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json", // Ensure the server knows you're sending JSON data
+          },
         }
       );
       // Save token and userId in context
