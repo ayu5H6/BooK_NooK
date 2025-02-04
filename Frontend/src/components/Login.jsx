@@ -6,7 +6,7 @@ import axios from "axios";
 
 const Login = () => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-
+  const apiUrl = process.env.REACT_APP_BACKEND_URL;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -25,7 +25,7 @@ const Login = () => {
     e.preventDefault();
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/auth/login",
+        `${apiUrl}/api/auth/login`,
         {
           email,
           password,

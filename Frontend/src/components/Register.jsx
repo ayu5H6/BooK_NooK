@@ -9,6 +9,7 @@ const Register = () => {
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
   const [error, setError] = useState(null);
+  const apiUrl = process.env.REACT_APP_BACKEND_URL;
   const navigate = useNavigate();
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -24,7 +25,7 @@ const Register = () => {
     setError(null);
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/auth/register",
+        `${apiUrl}/api/auth/register`,
         {
           name,
           email,
