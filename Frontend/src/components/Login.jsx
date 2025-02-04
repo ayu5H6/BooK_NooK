@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useUser } from "../context/UserContext"; // Import the context
 import axios from "axios";
-import API_BASE_URL from "../config";
+
 const Login = () => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
@@ -24,10 +24,13 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(`${API_BASE_URL}/api/auth/login`, {
-        email,
-        password,
-      });
+      const response = await axios.post(
+        "http://localhost:5000/api/auth/login",
+        {
+          email,
+          password,
+        }
+      );
       // Save token and userId in context
       localStorage.setItem("token", response.data.token);
       setUserId(response.data.userId); // Set userId in context
