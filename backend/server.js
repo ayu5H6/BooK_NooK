@@ -18,7 +18,13 @@ connectDB();
 
 app.use(express.json()); // Parse JSON requests
 app.use(cors({ origin: "http://localhost:5173" })); // Enable CORS for all routes
-
+app.use(
+  cors({
+    origin: "https://book-nook-flame.vercel.app/", // Use your Vercel URL here
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type"],
+  })
+);
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
